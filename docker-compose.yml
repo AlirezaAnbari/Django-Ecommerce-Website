@@ -4,23 +4,31 @@ services:
   db:
     container_name: db
     image: postgres:15-alpine
-    volumes: ./postgres/data:var/lib/postgresql/data
+    volumes: 
+      - ./postgres/data:/var/lib/postgresql/data
     environment: 
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     restart: always
-
+    expose:
+     - 5432
   backend:
     container_name: backend
     build:
       context: .
       dockerfile: ./dockerfiles/dev/django/Dockerfile
     volumes:
-      - ./core:/user/src/app
+      - ./core:/usr/src/app
+    working_dir: /usr/src/app
+    # Use this command for start the project only(first build)
+    # command: django-admin startproject core .
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - 8000:8000
     environment: 
       - Debug=True
-    restart: always
+    # restart: always
     depends_on:
       - db
 
